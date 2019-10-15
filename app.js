@@ -1,21 +1,31 @@
 const express = require('express');
-const path = require('path');
-const routerCards = require('./routes/cards');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const routerUsers = require('./routes/users');
-const routerSpace = require('./routes/space');
+const routerCards = require('./routes/cards');
 
 const app = express();
 
-const { PORT = 3000 } = process.env;
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true,
+});
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-})
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5da4e77ebc59791c8c649bed',
+  };
 
-app.use('/', routerCards);
+  next();
+});
+
+app.listen(3000);
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use('/', routerUsers);
-app.use('/', routerSpace);
+app.use('/', routerCards);
 
-
-
-app.use(express.static(path.join(__dirname, 'public')));
+module.exports = app;
