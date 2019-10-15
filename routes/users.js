@@ -6,7 +6,7 @@ const {
 router.post('/users', createUser);
 router.get('/users/:userId', getUser);
 router.get('/users', getAllUser);
-router.patch('/users/me', refreshInfoAboutMe);
-router.patch('./users/me/avatar', refreshAvatar);
+router.patch('/users/:userId', refreshInfoAboutMe); // Позже, когда создадим авторизацию, изменю "userId" -> "me"
+router.patch('/users/:userId/avatar', refreshAvatar);
 
 module.exports = router;
