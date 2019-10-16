@@ -1,9 +1,13 @@
-/* eslint-disable no-underscore-dangle */
 const Card = require('../models/card');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
+
+  if (!name || !link) {
+    res.send({ message: 'Введите имя и ссылку на картинку, чтобы создать карточку' });
+    return;
+  }
 
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
@@ -11,7 +15,7 @@ const createCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => res.send({ data: card }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };

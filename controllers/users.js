@@ -3,6 +3,11 @@ const User = require('../models/user');
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
+  if (!name || !about || !avatar) {
+    res.send({ message: 'Введите имя, информацию о себе и ссылку на аватар' });
+    return;
+  }
+
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
@@ -40,7 +45,7 @@ const refreshInfoAboutMe = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
-    req.params.id,
+    req.params.userId,
     {
       name,
       about,

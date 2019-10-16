@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-require('mongoose-type-url');
 
 const cardSchema = mongoose.Schema({
   name: {
@@ -9,8 +8,12 @@ const cardSchema = mongoose.Schema({
     maxlength: 30,
   },
   link: {
-    type: mongoose.SchemaTypes.Url,
-    require: true,
+    type: String,
+    required: true,
+    validate: {
+      validator: (link) => link.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.([-a-zA-Z0-9@:%_+.~#?&//=]*)([-a-zA-Z0-9@:%_+.~#?&//=]*)/g),
+    },
+    message: (link) => `${link.value} не валидная ссылка`,
   },
   owner: {
     type: mongoose.SchemaTypes.ObjectId,

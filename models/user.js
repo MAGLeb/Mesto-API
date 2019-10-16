@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-require('mongoose-type-url');
 
-const userShema = mongoose.Schema({
+const userSchema = mongoose.Schema({
   name: {
     type: String,
     require: true,
@@ -15,11 +14,15 @@ const userShema = mongoose.Schema({
     maxlength: 30,
   },
   avatar: {
-    type: mongoose.SchemaTypes.Url,
+    type: String,
     require: true,
+    validate: {
+      validator: (link) => link.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.([-a-zA-Z0-9@:%_+.~#?&//=]*)([-a-zA-Z0-9@:%_+.~#?&//=]*)/g),
+    },
+    message: (link) => `${link.value} не валидная ссылка`,
   },
 }, {
   versionKey: false,
 });
 
-module.exports = mongoose.model('user', userShema);
+module.exports = mongoose.model('user', userSchema);

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
+const routerError = require('./routes/error');
 
 const app = express();
 
@@ -27,5 +28,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/', routerUsers);
 app.use('/', routerCards);
+app.use('/', routerError);
 
 module.exports = app;
