@@ -1,9 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const routerUsers = require('./routes/users');
-const routerCards = require('./routes/cards');
-const routerError = require('./routes/error');
+const router = require('./routes/index');
 
 const app = express();
 
@@ -24,10 +21,6 @@ app.use((req, res, next) => {
 
 app.listen(3000);
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use('/', routerUsers);
-app.use('/', routerCards);
-app.use('/', routerError);
+app.use('/', router);
 
 module.exports = app;
