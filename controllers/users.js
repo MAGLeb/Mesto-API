@@ -1,5 +1,11 @@
 const User = require('../models/user');
 
+const handleResponse = (dbResponse, res) => {
+  dbResponse
+    .then((user) => res.send({ data: user }))
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+};
+
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
@@ -8,27 +14,20 @@ const createUser = (req, res) => {
     return;
   }
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  handleResponse(User.create({ name, about, avatar }), res);
 };
 
 const getUser = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  handleResponse(User.findById(req.params.userId), res);
 };
 
 const getAllUser = (req, res) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  handleResponse(User.find({}), res);
 };
 
 const refreshAvatar = (req, res) => {
   const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
+  handleResponse(User.findByIdAndUpdate(
     req.params.userId,
     { avatar },
     {
@@ -36,15 +35,13 @@ const refreshAvatar = (req, res) => {
       runValidators: true,
       upsert: true,
     },
-  )
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  ), res);
 };
 
 const refreshInfoAboutMe = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(
+  handleResponse(User.findByIdAndUpdate(
     req.params.userId,
     {
       name,
@@ -55,9 +52,7 @@ const refreshInfoAboutMe = (req, res) => {
       runValidators: true,
       upsert: true,
     },
-  )
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  ), res);
 };
 
 module.exports = {
