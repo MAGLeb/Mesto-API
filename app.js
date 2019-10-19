@@ -1,21 +1,26 @@
 const express = require('express');
-const path = require('path');
-const routerCards = require('./routes/cards');
-const routerUsers = require('./routes/users');
-const routerSpace = require('./routes/space');
+const mongoose = require('mongoose');
+const router = require('./routes/index');
 
 const app = express();
 
-const { PORT = 3000 } = process.env;
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true,
+});
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-})
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5da4e77ebc59791c8c649bed',
+  };
 
-app.use('/', routerCards);
-app.use('/', routerUsers);
-app.use('/', routerSpace);
+  next();
+});
 
+app.listen(3000);
 
+app.use('/', router);
 
-app.use(express.static(path.join(__dirname, 'public')));
+module.exports = app;
