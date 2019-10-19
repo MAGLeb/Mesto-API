@@ -10,18 +10,18 @@
   "author": "Glebas",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "nodemon": "^1.19.2"
+    "eslint": "6.5.1",
+    "eslint-config-airbnb-base": "14.0.0",
+    "eslint-plugin-import": "2.18.2",
+    "nodemon": "1.19.2",
+    "vue-eslint-parser": "6.0.4"
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "eslint-plugin-vue": "^5.2.3",
-    "express": "^4.17.1",
-    "mongodb": "^3.3.2",
-    "mongoose": "^5.7.3",
-    "mongoose-type-url": "^1.0.6",
-    "require": "^2.4.20"
+    "body-parser": "1.19.0",
+    "eslint-plugin-vue": "5.2.3",
+    "express": "4.17.1",
+    "mongodb": "3.3.2",
+    "mongoose": "5.7.3",
+    "uglify-js": ">=2.6.0"
   }
 }
