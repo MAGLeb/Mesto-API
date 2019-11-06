@@ -1,3 +1,6 @@
+const { NODE_ENV, JWT_SECRET } = process.env;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const handleResponse = (dbResponse, res) => {
@@ -6,19 +9,49 @@ const handleResponse = (dbResponse, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+const login = (req, res) => {
+  const { email, password } = req.body;
 
-  if (!name || !about || !avatar) {
-    res.send({ message: 'Введите имя, информацию о себе и ссылку на аватар' });
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+      res.status(201).cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      }).send({ message: 'Success authorization' });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
+const createUser = (req, res) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+
+  if (!name || !about || !avatar || !email || !password) {
+    res.send({ message: 'Введите имя, информацию о себе, ссылку на аватар, пароль и Email' });
     return;
   }
 
-  handleResponse(User.create({ name, about, avatar }), res);
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => res.send(user))
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
 const getUser = (req, res) => {
-  handleResponse(User.findById(req.params.userId), res);
+  User.findById(req.params.userId)
+    .then((user) => (user === null ? res.status(500).send({ message: 'User does not exist' }) : res.send({ data: user })))
+    .catch(() => res.status(500).send({ message: 'User does not exist' }));
 };
 
 const getAllUser = (req, res) => {
@@ -27,13 +60,13 @@ const getAllUser = (req, res) => {
 
 const refreshAvatar = (req, res) => {
   const { avatar } = req.body;
+
   handleResponse(User.findByIdAndUpdate(
-    req.params.userId,
+    req.user._id,
     { avatar },
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   ), res);
 };
@@ -42,7 +75,7 @@ const refreshInfoAboutMe = (req, res) => {
   const { name, about } = req.body;
 
   handleResponse(User.findByIdAndUpdate(
-    req.params.userId,
+    req.user._id,
     {
       name,
       about,
@@ -50,7 +83,6 @@ const refreshInfoAboutMe = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   ), res);
 };
@@ -61,4 +93,5 @@ module.exports = {
   getAllUser,
   refreshAvatar,
   refreshInfoAboutMe,
+  login,
 };
