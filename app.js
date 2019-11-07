@@ -8,6 +8,7 @@ const { errors, celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 const router = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -21,6 +22,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -41,6 +44,8 @@ app.post('/signup', celebrate({
 
 app.use(auth);
 app.use('/', router);
+
+app.use(errorLogger);
 
 app.use(errors());
 
