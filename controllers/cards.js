@@ -1,33 +1,40 @@
 const Card = require('../models/card');
+const { ServerError, NoResursError } = require('../middlewares/errors');
 
-const handleResponse = (dbResponse, res) => {
+const handleResponse = (dbResponse, res, next) => {
   dbResponse
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => next(new ServerError(err.message)));
 };
 
-const createCard = (req, res) => {
+const handleResponseId = (dbResponse, req, res, next) => {
+  dbResponse
+    .then((card) => (card === null ? next(new NoResursError(`No card with this ID:${req.params.cardId}`)) : res.send({ data: card})))
+    .catch(() => next(new NoResursError(`No card with this ID:${req.params.cardId}`)));
+};
+
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   if (!name || !link) {
-    res.send({ message: 'Введите имя и ссылку на картинку, чтобы создать карточку' });
+    res.send({ message: 'Enter name and link to create card' });
     return;
   }
 
-  handleResponse(Card.create({ name, link, owner }), res);
+  handleResponse(Card.create({ name, link, owner }), res, next);
 };
 
-const deleteCard = (req, res) => {
-  handleResponse(Card.findByIdAndRemove(req.params.cardId), res);
+const deleteCard = (req, res, next) => {
+  handleResponseId(Card.findByIdAndRemove(req.params.cardId), req, res, next);
 };
 
 const getAllCard = (req, res) => {
   handleResponse(Card.find({}), res);
 };
 
-const likeCard = (req, res) => {
-  handleResponse(Card.findByIdAndUpdate(
+const likeCard = (req, res, next) => {
+  handleResponseId(Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     {
@@ -35,11 +42,11 @@ const likeCard = (req, res) => {
       runValidators: true,
       upsert: true,
     },
-  ), res);
+  ), req, res, next)
 };
 
-const dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(
+const dislikeCard = (req, res, next) => {
+  handleResponseId(Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     {
@@ -47,9 +54,7 @@ const dislikeCard = (req, res) => {
       runValidators: true,
       upsert: true,
     },
-  )
-    .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Данные не прошли валидацию. Либо произошло что-то совсем немыслимое' }));
+  ), req, res, next)
 };
 
 module.exports = {

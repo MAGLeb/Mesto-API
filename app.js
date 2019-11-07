@@ -26,6 +26,15 @@ app.post('/signup', createUser);
 app.use(auth);
 app.use('/', router);
 
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const { status = 500, message } = err;
+
+  res.status(status).send({
+    message: message === '' ? "On server error" : err.message
+  });
+});
+
 app.listen(3000);
 
 module.exports = app;
