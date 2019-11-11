@@ -3,9 +3,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { errors, celebrate, Joi } = require('celebrate');
+
 const auth = require('./middlewares/auth');
 const router = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -20,11 +23,46 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use(requestLogger);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+      throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().min(2).max(30),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().required().uri(),
+    about: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().min(2).max(30),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
 
 app.use(auth);
 app.use('/', router);
+
+app.use(errorLogger);
+
+app.use(errors());
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const { status = 500, message } = err;
+
+  res.status(status).send({
+    message: message === '' ? "On server error" : err.message
+  });
+});
 
 app.listen(3000);
 

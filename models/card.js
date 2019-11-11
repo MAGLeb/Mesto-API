@@ -12,8 +12,8 @@ const cardSchema = mongoose.Schema({
     required: true,
     validate: {
       validator: (link) => link.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.([-a-zA-Z0-9@:%_+.~#?&//=]*)([-a-zA-Z0-9@:%_+.~#?&//=]*)/g),
+      message: (link) => `${link.value} not valid link`,
     },
-    message: (link) => `${link.value} не валидная ссылка`,
   },
   owner: {
     type: mongoose.SchemaTypes.ObjectId,
