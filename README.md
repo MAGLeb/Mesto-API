@@ -1,5 +1,5 @@
-# nodeExpress
-Trying node Express
+# NodeExpress
+Построение запрос к серверной части, для проекта Mesto.
 
 API locketed on: https://mestoweb.ml
 
